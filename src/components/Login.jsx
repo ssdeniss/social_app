@@ -1,14 +1,25 @@
 import React from "react";
-import GoogleLogin from "react-google-login";
-import { useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
+import FacebookLogin from "react-facebook-login";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import shareVideo from "../assets/share.mp4";
 import logo from "../assets/logowhite.png";
+import facebookIcon from "../assets/facebook.svg";
+import { googleAuth } from "../constants/API";
 
 const Login = () => {
-  const responseGoogle = (response) =>{
-    
-  }
+  console.log(googleAuth);
+  const responseGoogle = (response) => {
+    console.log(response);
+    localStorage.setItem("user", JSON.stringify(response.profileObj));
+    const { name, goggleId, imageUrl } = response.profileObj;
+    const doc = {
+      _id: goggleId,
+      _type: "user",
+      user: name,
+      Image: imageUrl,
+    };
+  };
   return (
     <div className="flex justify-start items-center flex-col h-screen">
       <div className="relative w-full h-full">
@@ -25,22 +36,33 @@ const Login = () => {
           <div className="p-5">
             <img src={logo} width="130px" alt="logo" />
           </div>
-          <div className="shadow-2xl">
-            <GoogleLogin
-              clientId=""
-              render={(renderProps) => (
-                <button
-                  type="button"
-                  className="bg-mainColor flex justify-center items-center p-3 rounded-lg cursor-pointer outline-none"
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                >
-                  <FcGoogle className="mr-4" /> Sign in with Google
-                </button>
-              )}
+          <div style={{ flexDirection: "column" }} className="shadow-2xl flex">
+            <GoogleOAuthProvider
+              clientId={googleAuth}
               onSuccess={responseGoogle}
               onFailure={responseGoogle}
               cookiePolicy="single_host_origin"
+            >
+              <GoogleLogin
+                onSuccess={(response) => console.log(response)}
+                onError={(response) => console.log(response)}
+                type="button"
+                className="bg-mainColor flex justify-center items-center p-3 cursor-pointer outline-none"
+              />
+            </GoogleOAuthProvider>
+            <FacebookLogin
+              appId="544143500469475"
+              autoLoad={true}
+              fields="name,email,picture"
+              icon={facebookIcon}
+              buttonStyle={{
+                backgroundColor: "#3b5998",
+                height: "40px",
+                color: "#fff",
+                marginTop: "10px",
+                borderRadius: "5px",
+              }}
+              cssClass="flex justify-center items-center p-3 cursor-pointer outline-none w-full"
             />
           </div>
         </div>
