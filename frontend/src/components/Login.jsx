@@ -1,24 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import FacebookLogin from "react-facebook-login";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleLogin } from "@react-oauth/google";
+import { client } from "../client";
 import shareVideo from "../assets/share.mp4";
 import logo from "../assets/logowhite.png";
 import facebookIcon from "../assets/facebook.svg";
 import { googleAuth } from "../constants/API";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   console.log(googleAuth);
   const responseGoogle = (response) => {
     console.log(response);
-    localStorage.setItem("user", JSON.stringify(response.profileObj));
-    const { name, goggleId, imageUrl } = response.profileObj;
+    localStorage.setItem("user", JSON.stringify(response.clientId));
+    const { name, goggleId, imageUrl } = response.clientId;
     const doc = {
       _id: goggleId,
       _type: "user",
       user: name,
       Image: imageUrl,
     };
+    if (response.clientId) {
+      navigate("/", { replace: true });
+    }
+    client.createIfNotExists(doc).then(() => {
+      navigate("/", { replace: true });
+    });
   };
   return (
     <div className="flex justify-start items-center flex-col h-screen">
@@ -44,8 +53,8 @@ const Login = () => {
               cookiePolicy="single_host_origin"
             >
               <GoogleLogin
-                onSuccess={(response) => console.log(response)}
-                onError={(response) => console.log(response)}
+                onSuccess={responseGoogle}
+                onFailure={responseGoogle}
                 type="button"
                 className="bg-mainColor flex justify-center items-center p-3 cursor-pointer outline-none"
               />
